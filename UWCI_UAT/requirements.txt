@@ -3,7 +3,7 @@ azure-common==1.1.25
 azure-core==1.6.0
 azure-functions==1.2.1
 azure-nspkg==3.0.2
-azure-storage-blob==12.3.2
+azure-storage-blob==12.3.1
 certifi==2020.4.5.2
 cffi==1.14.0
 chardet==3.0.4
