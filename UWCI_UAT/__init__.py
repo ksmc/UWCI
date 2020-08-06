@@ -23,8 +23,8 @@ def main(myblob: func.InputStream):
                  f"Blob Size: {myblob.length} bytes")
     SERVER = 'uwciuatv1sqlserver.database.windows.net'
     DATABASE = 'impact-funds-uat'
-    username = 'uwciadmin'
-    pwd = 'Wd4cdz/7'
+    username=os.environ['U_NAME']
+    pwd=os.environ['P_VAL']
     driver= '{ODBC Driver 17 for SQL Server}'
     logging.info(f"Read all the sql server varoables but not connected yet")
     cnxn = pyodbc.connect('DRIVER='+driver+';SERVER='+SERVER+';PORT=1433;DATABASE='+DATABASE+';UID='+username+';PWD='+ pwd)
@@ -39,7 +39,7 @@ def main(myblob: func.InputStream):
     
     #BLOB_STORAGEACCOUNTNAME="uwciuatv1ftp"
     #BLOB_STORAGEACCOUNTKEY="b35w8vKSfdhp0xPT8ab6ZuLU5DxW6Pi6RtG1M8qF9TgArQc0h1LwtckDsUNY+YegjELx4KjRApQgV+hbKhNgOA=="
-    BLOBNAME="SFTP_File"
+    BLOBNAME="FOF_Revised template_mking.xlsx"
     CONTAINERNAME= "sftpfile"
     #ARCHIVE_CONTAINER="uwci-sftp-archive"
     logging.info(f"Read all the blob variables")
@@ -91,7 +91,7 @@ def main(myblob: func.InputStream):
         account_name="uwciuatv1ftp"
         # Source
         source_container_name = "sftpfile"
-        source_file_path = "SFTP_File"
+        source_file_path = "FOF_Revised template_mking.xlsx"
         blob_service_client = BlobServiceClient.from_connection_string(connection_string)
         source_blob = (f"https://{account_name}.blob.core.windows.net/{source_container_name}/{source_file_path}")
 
@@ -188,7 +188,7 @@ def main(myblob: func.InputStream):
                     Adult_Metric_group[i]=Adult_Metric_group[i-1]
                 else:
                     pass
-            #print("Adult Metric group:%s"%Adult_Metric_group)
+            #print("Adult Metric group:%s"%Adublob_name1lt_Metric_group)
             
 
             df_Child = df1['Child'].replace(np.nan,'', regex=True)
