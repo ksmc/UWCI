@@ -160,25 +160,28 @@ def main(myblob: func.InputStream):
             
             df_CBO_Info=df1['CBO Information'].dropna()
             logging.info(f"Read into CBO Dataframe")
-
+            Submission_Period = None
+            # 
             for k,v in df_CBO_Info['Organization Information'].items():
                 for k1,v1 in df_CBO_Info['Unnamed: 1'].items():
-                    if k==k1 and v.find('Grantee Name')>=0:
+                    if k==k1 and v.lower().find(('Grantee Name').lower())>=0:
                         CBO_Name=v1
-                    elif k==k1 and v.find('Grantee ID')>=0:
+                    elif k==k1 and v.lower().find(('Grantee ID').lower())>=0:
                         CBO_Grantee_ID=v1
-                    elif k==k1 and v.find('Grantee Type')>=0:
+                    elif k==k1 and v.lower().find(('Grantee Type').lower())>=0:
                         Fund=v1
-                    elif k==k1 and v.find('Report Period')>=0:
+                    elif k==k1 and v.lower().find(('Report Period').lower())>=0:
                         CBO_Rpt_Period=v1
+                    elif k==k1 and v.lower().find(('Submission Period').lower())>=0:
+                        Submission_Period=v1
                     else:
                         pass
             #Insert into Metrics.Dim_Fund
             #Insert into Metrics.Dim_Rpt_Period
             #Insert into Stage.File_Master
             blob_name1=CBO_Name+str(Curr_dt)
-            sql3= ("INSERT INTO Stage.File_Master(File_ID,File_Type,File_Date,Create_date,File_Status,Update_date,Fund,CBO_code,CBO_Name,Report_Period) Values (?,?,?,?,?,?,?,?,?,?);")
-            Val3 = (File_ID[0],'D',Curr_dt,Curr_dt,'Received',Curr_dt,Fund,CBO_Grantee_ID,CBO_Name,CBO_Rpt_Period)
+            sql3= ("INSERT INTO Stage.File_Master(File_ID,File_Type,File_Date,Create_date,File_Status,Update_date,Fund,CBO_code,CBO_Name,Report_Period,Submission_Period) Values (?,?,?,?,?,?,?,?,?,?,?);")
+            Val3 = (File_ID[0],'D',Curr_dt,Curr_dt,'Received',Curr_dt,Fund,CBO_Grantee_ID,CBO_Name,CBO_Rpt_Period,Submission_Period)
             cursor.execute(sql3,Val3)
             cnxn.commit()
             logging.info(f"CBO Data has been entered for File ID:{File_ID[0]}")
@@ -244,7 +247,7 @@ def main(myblob: func.InputStream):
             df_Demographics_All = df_All['Demographics']
             df_Demographics_All.columns=df_Demographics_All.columns.str.replace('Unnamed.*', '')
             Demographics_Metric_group=[]
-            for key in df_Family_All.keys():
+            for key in df_Demographics_All.keys():
                 #print("Key Value:%s"%key)
                 Demographics_Metric_group.append(key)
             for i in range(len(Demographics_Metric_group)):
@@ -266,7 +269,7 @@ def main(myblob: func.InputStream):
                 Person_CUID=[]
                 Family_ID=[]
                 Age=[]
-                i=5
+                i=0
                 for key in df_Adult.keys():
                     for k,v in df_Adult[key].items():
                         if key.find('Client Unique ID (CUID)')>=0 and k>0:
@@ -275,15 +278,15 @@ def main(myblob: func.InputStream):
                             Family_ID.append(v)
                         elif key.find('Age')>=0 and k>0:
                             Age.append(v)
-                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metric Name')<0 and key.find('CBO_ID')<0 and key.find('Client Unique ID (CUID)')<0 and key.find('Family_ID')<0 and key.find('Age')<0 and k==0:
+                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metric Name')<0 and key.find('Metrics Name')<0 and key.find('CBO_ID')<0 and key.find('Client Unique ID (CUID)')<0 and key.find('Family_ID')<0 and key.find('Age')<0 and k==0:
                             Metric1=v
-                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metric Name')<0 and key.find('CBO_ID')<0 and key.find('Client Unique ID (CUID)')<0 and key.find('Family_ID')<0 and key.find('Age')<0 and k>=1:
+                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metric Name')<0 and key.find('Metrics Name')<0 and key.find('CBO_ID')<0 and key.find('Client Unique ID (CUID)')<0 and key.find('Family_ID')<0 and key.find('Age')<0 and k>=1:
                             Metric1_value=v
                             #print("Value of i:%s"%i)
                             #print("Adult_Metric_group:%s"%Adult_Metric_group[i])
                             #print("Metric:%s"%Metric1)
                             Metric_Insert(File_Master_ID,Person_CUID[k-1],Family_ID[k-1],Age[k-1],Metric1,Metric1_value,key,'Adult',Adult_Metric_group[i])
-                            i=i+1
+                    i=i+1
             
             except Exception as ex:
                 print("Issue in Adult tab")
@@ -311,12 +314,12 @@ def main(myblob: func.InputStream):
                             Person_CUID.append(v)
                         elif key.find('Family_ID')>=0 and k>0:
                             Family_ID.append(v)
-                        elif key.find('Age')>=0 and k>0:
+                        elif (key == 'Age') and k > 0:
                             Age.append(v)
-                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metric Name')<0 and key.find('CBO_ID')<0 and key.find('Client Unique ID (CUID)')<0 and key.find('Family_ID')<0 and key.find('Age')<0 and k==0:
+                        elif key.find(key) >= 0 and key.find('Metric ID') < 0 and key.find('Metric Name') < 0 and key.find('Metrics Name') < 0 and key.find('CBO_ID') < 0 and key.find('Client Unique ID (CUID)') < 0 and key.find('Family_ID') < 0 and (key != 'Age') and k == 0:                        
                             Metric1=v
                             i=i+1
-                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metric Name')<0 and key.find('CBO_ID')<0 and key.find('Client Unique ID (CUID)')<0 and key.find('Family_ID')<0 and key.find('Age')<0 and k>=1:
+                        elif key.find(key) >= 0 and key.find('Metric ID') < 0 and key.find('Metric Name') < 0 and key.find('Metrics Name') < 0 and key.find('CBO_ID') < 0 and key.find('Client Unique ID (CUID)') < 0 and key.find('Family_ID') < 0 and (key != 'Age') and k >= 1:                        
                             Metric1_value=v
                             #print("Value of i:%s"%i)
                             #print("Child_Metric_group:%s"%Child_Metric_group[i])
@@ -358,13 +361,13 @@ def main(myblob: func.InputStream):
                         #print("Family ID:%s"%Family_ID[0])
                 for key in df_Family.keys():
                     for k,v in df_Family[key].items():
-                        if key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metrics Name')<0 and key.find('CBO_ID')<0 and key.find('Family_ID')<0 and k==0:
+                        if key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metrics Name')<0 and key.find('Metric Name')<0 and key.find('CBO_ID')<0 and key.find('Family_ID')<0 and k==0:
                             Metric1=v
                             if i<len(Family_Metric_group)-1:
                                 i=i+1
                             else:
                                 pass
-                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metrics Name')<0  and key.find('CBO_ID')<0 and key.find('Family_ID')<0 and k>=1:
+                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metrics Name')<0 and key.find('Metric Name')<0 and key.find('CBO_ID')<0 and key.find('Family_ID')<0 and k>=1:
                             Metric1_value=v
                             Metric_Insert(File_Master_ID,'',FamilyID[k-1],'',Metric1,Metric1_value,key,'Family',Family_Metric_group[i])
                         else:
@@ -402,10 +405,10 @@ def main(myblob: func.InputStream):
                 for key in df_demographics.keys():
                     for k,v in df_demographics[key].items():
 
-                        if key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metrics Name')<0 and key.find('CBO_ID')<0 and key.find('Family_ID')<0 and key.find('Client Unique ID (CUID)')<0 and key.find('Age')<0 and k==0:
+                        if key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metrics Name')<0 and key.find('Metric Name')<0 and key.find('CBO_ID')<0 and key.find('Family_ID')<0 and key.find('Client Unique ID (CUID)')<0 and key.find('Age')<0 and k==0:
                             Metric1=v
                             i=i+1
-                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metrics Name')<0 and key.find('CBO_ID')<0 and key.find('Family_ID')<0 and key.find('Client Unique ID (CUID)')<0 and key.find('Age')<0 and k>=1:
+                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metrics Name')<0 and key.find('Metric Name')<0 and key.find('CBO_ID')<0 and key.find('Family_ID')<0 and key.find('Client Unique ID (CUID)')<0 and key.find('Age')<0 and k>=1:
                             Metric1_value=v
                             Metric_Insert(File_Master_ID,Person_CUID[k-1],Family_ID[k-1],Age[k-1],Metric1,Metric1_value,key,'Demographics',Demographics_Metric_group[i])
                         else:
@@ -431,9 +434,9 @@ def main(myblob: func.InputStream):
                 for key in df_System_Level.keys():
                     for k,v in df_System_Level[key].items():
                         
-                        if key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metric Name')<0 and key.find('CBO_ID')<0 and k==0:
+                        if key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metric Name')<0 and key.find('Metrics Name')<0 and key.find('CBO_ID')<0 and k==0:
                             Metric1=v
-                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metric Name')<0 and key.find('CBO_ID')<0 and k>=1:
+                        elif key.find(key)>=0 and key.find('Metric ID')<0 and key.find('Metric Name')<0 and key.find('Metrics Name')<0 and key.find('CBO_ID')<0 and k>=1:
                             Metric1_value=v
                             Metric_Insert(File_Master_ID,'','','',Metric1,Metric1_value,key,'System Level','Systems Level Improvement Metrics')
                         else:
