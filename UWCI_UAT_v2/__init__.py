@@ -58,7 +58,7 @@ def main(myblob: func.InputStream):
         f"Connected to Azure SQL. Total Records in CBO_Detail_Person {count}")
     Curr_dt = datetime.now()
 
-    BLOBNAME = myblob.split('/')[-1]
+    BLOBNAME = myblob.name.split('/')[-1]
     logging.info(f"Blob file name being processed: {BLOBNAME}")
     CONTAINERNAME = os.environ['config_SourceContainerName']
     logging.info(f"Read all the blob variables")
