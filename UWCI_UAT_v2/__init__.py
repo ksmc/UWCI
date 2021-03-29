@@ -59,6 +59,7 @@ def main(myblob: func.InputStream):
     Curr_dt = datetime.now()
 
     BLOBNAME = myblob.name.split('/')[-1]
+    BLOBEXT = '.' + BLOBNAME.split('.')[-1]
     logging.info(f"Blob file name being processed: {BLOBNAME}")
     CONTAINERNAME = os.environ['config_SourceContainerName']
     logging.info(f"Read all the blob variables")
@@ -223,7 +224,7 @@ def main(myblob: func.InputStream):
             # Insert into Metrics.Dim_Fund
             # Insert into Metrics.Dim_Rpt_Period
             # Insert into Stage.File_Master
-            blob_name1 = CBO_Name+str(Curr_dt)
+            blob_name1 = CBO_Name+str(Curr_dt) + BLOBEXT
             sql3 = ("INSERT INTO Stage.File_Master(File_ID,File_Type,File_Date,Create_date,File_Status,Update_date,Fund,CBO_code,CBO_Name,Report_Period,Submission_Period) Values (?,?,?,?,?,?,?,?,?,?,?);")
             Val3 = (File_ID[0], 'D', Curr_dt, Curr_dt, 'Received', Curr_dt,
                     Fund, CBO_Grantee_ID, CBO_Name, CBO_Rpt_Period, Submission_Period)
