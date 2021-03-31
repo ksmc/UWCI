@@ -144,9 +144,10 @@ def main(myblob: func.InputStream):
         # Target
         target_container_name = os.environ['config_TargetContainerName']
         target_file_path = blob_name1
+        print('Source Blob: ', source_container_name, source_file_path)
         copied_blob = blob_service_client.get_blob_client(
             target_container_name, target_file_path)
-        copied_blob.start_copy_from_url(source_blob)
+        copied_blob.start_copy_from_url(source_blob.replace('%', '%25'))
 
         # If you would like to delete the source file
         remove_blob = blob_service_client.get_blob_client(
@@ -192,7 +193,7 @@ def main(myblob: func.InputStream):
             df1 = pd.read_excel(Localfile, sheet_name=['CBO Information', 'Adult', 'Child', 'Family',
                                                        'System Level', 'Demographics'], header=1, index=False, orient='index')
 
-            df_CBO_Info = df1['CBO Information'].dropna()
+            df_CBO_Info = df1['CBO Information'].dropna(subset=['Unnamed: 1'])
             logging.info(f"Read into CBO Dataframe")
             Submission_Period = None
             holder = 0
